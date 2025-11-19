@@ -1,0 +1,29 @@
+name: Build Architeuthis
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Emulateur ARM (le point critique)
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      # Builder Docker avance
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Le Test de compilation
+      - name: Build only
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          platforms: linux/arm64,linux/amd64
+          tags: architeuthis:test
