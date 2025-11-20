@@ -1,4 +1,4 @@
-# Project Architeuthis: DevSecOps Edge Lab
+# 🐙 Project Architeuthis: DevSecOps Edge Lab
 
 ![CI Status](https://github.com/Gael-Troadec/K3s-Pi5-Lab/actions/workflows/docker-build.yml/badge.svg)
 ![Platform](https://img.shields.io/badge/platform-linux%2Farm64-orange)
@@ -8,7 +8,7 @@
 
 **Architeuthis** is a personal lab project designed to simulate a fleet of autonomous underwater drones.
 
-As a former Military Ops transitioning to DevSecOps, my goal with this project is to build a complete **distributed infrastructure** from scratch. I am moving away from "click-ops" to fully automated, code-driven deployments on constrained hardware (Raspberry Pi 5).
+As a ex-Military transitioning to DevSecOps, my goal with this project is to build a complete **distributed infrastructure** from scratch. I am moving away from "click-ops" to fully automated, code-driven deployments on constrained hardware (Raspberry Pi 5).
 
 **Core Learning Objectives:**
 * Mastering **Linux** & **Networking** fundamentals.
@@ -53,9 +53,54 @@ The workflow mimics a production environment but adapted for a home lab:
 
 ## 🚀 How to Run (Reproduction)
 
-If you want to replicate this setup on a Raspberry Pi:
+If you want to replicate this setup on a Raspberry Pi, follow these steps:
 
 ### 1. Install K3s
+First, install the lightweight Kubernetes engine on the Pi (with user permissions enabled):
+
 ```bash
-# Install K3s with user permissions
 curl -sfL [https://get.k3s.io](https://get.k3s.io) | INSTALL_K3S_EXEC="--write-kubeconfig-mode 644" sh -
+````
+
+### 2\. Deploy the Fleet
+
+Clone the repository and apply the Kubernetes manifests:
+
+```bash
+git clone [https://github.com/Gael-Troadec/K3s-Pi5-Lab.git](https://github.com/Gael-Troadec/K3s-Pi5-Lab.git)
+cd K3s-Pi5-Lab
+kubectl apply -f manifests/
+```
+
+### 3\. Access the Dashboard
+
+Since this is a local lab without a real domain name, you need to map the local domain.
+
+Add this line to your local `/etc/hosts` (Linux/Mac) or `C:\Windows\System32\drivers\etc\hosts` (Windows):
+
+```text
+192.168.1.XXX   architeuthis.local
+```
+
+*(Replace `192.168.1.XXX` with your Raspberry Pi IP address)*
+
+Then open your browser and navigate to: **http://architeuthis.local**
+
+-----
+
+## 🗺️ Roadmap
+
+| Phase | Focus | Status |
+| :--- | :--- | :--- |
+| **I. Foundations** | Linux, Docker, CI/CD | ✅ Done |
+| **II. Orchestration** | K3s, Ingress, GitOps | 🔄 In Progress |
+| **III. Persistence** | Storage, Database, State | ⏳ Planned |
+| **IV. Mutation** | Rewrite in Golang | ⏳ Planned |
+| **V. Security** | CKS Prep, Hardening | ⏳ Planned |
+
+-----
+
+*Project maintained by Gael Troadec.*
+
+```
+```
