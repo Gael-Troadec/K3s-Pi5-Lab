@@ -1,4 +1,3 @@
-````markdown
 # 🐙 Project Architeuthis: DevSecOps Edge Lab
 
 ![CI Status](https://github.com/Gael-Troadec/K3s-Pi5-Lab/actions/workflows/docker-build.yml/badge.svg)
@@ -43,7 +42,7 @@ The workflow mimics a production environment but adapted for a home lab:
 3. **Registry:** Images stored on Docker Hub.
 4. **Edge Node (Prod):** Raspberry Pi 5 running K3s pulls the image and updates the deployment.
 
-### 📡 Architecture Diagram
+### 📡 Infrastructure Flow
 
 ```mermaid
 graph LR
@@ -65,31 +64,29 @@ graph LR
     %% Liens entre les zones
     Developer_Zone -.-> Cloud_CI
     Cloud_CI -.-> Edge_Prod
-````
+```
 
 ### Tech Stack
+* **Language:** Python (Flask)
+* **Container:** Docker
+* **Orchestration:** K3s (Lightweight Kubernetes)
+* **Ingress:** Traefik
+* **Tools:** VS Code, Git, K9s
 
-  * **Language:** Python (Flask)
-  * **Container:** Docker
-  * **Orchestration:** K3s (Lightweight Kubernetes)
-  * **Ingress:** Traefik
-  * **Tools:** VS Code, Git, K9s
-
------
+---
 
 ## 🚀 How to Run (Reproduction)
 
 If you want to replicate this setup on a Raspberry Pi, follow these steps:
 
-### 1\. Install K3s
-
+### 1. Install K3s
 First, install the lightweight Kubernetes engine on the Pi (with user permissions enabled):
 
 ```bash
 curl -sfL [https://get.k3s.io](https://get.k3s.io) | INSTALL_K3S_EXEC="--write-kubeconfig-mode 644" sh -
 ```
 
-### 2\. Deploy the Fleet
+### 2. Deploy the Fleet
 
 Clone the repository and apply the Kubernetes manifests:
 
@@ -99,7 +96,7 @@ cd K3s-Pi5-Lab
 kubectl apply -f manifests/
 ```
 
-### 3\. Access the Dashboard
+### 3. Access the Dashboard
 
 Since this is a local lab without a real domain name, you need to map the local domain.
 
@@ -113,7 +110,7 @@ Add this line to your local `/etc/hosts` (Linux/Mac) or `C:\Windows\System32\dri
 
 Then open your browser and navigate to: **http://architeuthis.local**
 
------
+---
 
 ## 🗺️ Roadmap
 
@@ -125,9 +122,6 @@ Then open your browser and navigate to: **http://architeuthis.local**
 | **IV. Mutation** | Rewrite in Golang | ⏳ Planned |
 | **V. Security** | CKS Prep, Hardening | ⏳ Planned |
 
------
+---
 
 *Project maintained by Gael Troadec.*
-
-```
-```
