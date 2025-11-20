@@ -16,7 +16,7 @@ def hello():
         count = "ERROR"
         redis_status = "DISCONNECTED"
 
-    return (f"SYSTEM ARCHITEUTHIS ONLINE\n
+    return (f"SYSTEM ARCHITEUTHIS ONLINE\n"
             f"Pod ID: {socket.gethostname()}\n"
             f"Architecture: {platform.machine()}\n"
             f"Memory State (Redis): {redis_status}\n"
