@@ -1,9 +1,17 @@
-import time
+from flask import Flask
 import platform
+import socket
 
-print("Demarrage du systeme Architeuthis...", flush=True)
-print(f"Architeuthis detectee : {platform.machine()}", flush=True)
+app = Flask(__name__)
 
-while True:
-    print("En attente d'ordres...", flush=True)
-    time.sleep(60)
+@app.route('/')
+def hello():
+    return f"SYSTEM ARCHITEUTHIS ONLINE\npod ID: {socket.gethostname()}\nArchitecture: {platform.machine()}\n"
+
+@app.route('/health')
+def health():
+    return "OK", 200
+
+if __name__ == '__main__':
+    print("Demarrage du Serveur Web Architeuthis...", flush=True)
+    app.run(host='0.0.0.0', port=5000)
