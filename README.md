@@ -42,6 +42,34 @@ The workflow mimics a production environment but adapted for a home lab:
 3.  **Registry:** Images stored on Docker Hub.
 4.  **Edge Node (Prod):** Raspberry Pi 5 running K3s pulls the image and updates the deployment.
 
+ ### 📡 Architecture Diagram
+
+```mermaid
+graph TD
+    subgraph "Command & Control (WSL2/PC)"
+        Developer[👱 Gael] -->|Push Code| GitHub[GitHub Repo]
+        GitHub -->|Trigger| Actions[GitHub Actions CI]
+    end
+
+    subgraph "Docker Infrastructure"
+        Actions -->|Build & Test| QEMU[QEMU Multi-Arch Build]
+        QEMU -->|Push Image| Hub[Docker Hub Registry]
+    end
+
+    subgraph "Edge Layer (Raspberry Pi 5 / K3s)"
+        K3s[K3s Cluster] -->|Pull Image| Hub
+        
+        subgraph "Cluster K3s"
+            Ingress[Traefik Ingress] -->|Route Traffic| Service[K8s Service]
+            Service -->|Load Balance| Pod1[🦈 Architeuthis Agent 1]
+            Service -->|Load Balance| Pod2[🦈 Architeuthis Agent 2]
+        end
+    end
+
+    style Edge Layer fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    style Pod1 fill:#ffccbc,stroke:#ff5722
+    style Pod2 fill:#ffccbc,stroke:#ff5722
+
 ### Tech Stack
 * **Language:** Python (Flask)
 * **Container:** Docker
