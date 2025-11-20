@@ -46,27 +46,27 @@ The workflow mimics a production environment but adapted for a home lab:
 
 ```mermaid
 graph TD
-    subgraph "Command & Control (WSL2/PC)"
+    subgraph Dev ["Command & Control (WSL2/PC)"]
         Developer[👱 Gael] -->|Push Code| GitHub[GitHub Repo]
         GitHub -->|Trigger| Actions[GitHub Actions CI]
     end
 
-    subgraph "Docker Infrastructure"
+    subgraph DockerInfra ["Docker Infrastructure"]
         Actions -->|Build & Test| QEMU[QEMU Multi-Arch Build]
         QEMU -->|Push Image| Hub[Docker Hub Registry]
     end
 
-    subgraph "Edge Layer (Raspberry Pi 5 / K3s)"
+    subgraph Edge ["Edge Layer (Raspberry Pi 5 / K3s)"]
         K3s[K3s Cluster] -->|Pull Image| Hub
         
-        subgraph "Cluster K3s"
+        subgraph Cluster ["Cluster K3s Internal"]
             Ingress[Traefik Ingress] -->|Route Traffic| Service[K8s Service]
-            Service -->|Load Balance| Pod1[🦈 Architeuthis Agent 1]
-            Service -->|Load Balance| Pod2[🦈 Architeuthis Agent 2]
+            Service -->|Load Balance| Pod1[🦈 Agent 1]
+            Service -->|Load Balance| Pod2[🦈 Agent 2]
         end
     end
 
-    style Edge Layer fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    style Edge fill:#e1f5fe,stroke:#01579b,stroke-width:2px
     style Pod1 fill:#ffccbc,stroke:#ff5722
     style Pod2 fill:#ffccbc,stroke:#ff5722
 
