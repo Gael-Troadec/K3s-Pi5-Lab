@@ -46,30 +46,25 @@ The workflow mimics a production environment but adapted for a home lab:
 ### 📡 Architecture Diagram
 
 ```mermaid
-graph TD
-    subgraph Dev ["Command & Control (WSL2/PC)"]
-        Developer[👱 Gael] -->|Push Code| GitHub[GitHub Repo]
-        GitHub -->|Trigger| Actions[GitHub Actions CI]
+graph LR
+    subgraph Developer_Zone [💻 Dev Environment]
+        User(👱 Gael) -->|Code & Push| GitHub[GitHub Repo]
     end
 
-    subgraph DockerInfra ["Docker Infrastructure"]
-        Actions -->|Build & Test| QEMU[QEMU Multi-Arch Build]
-        QEMU -->|Push Image| Hub[Docker Hub Registry]
+    subgraph Cloud_CI [☁️ CI / Registry]
+        GitHub -->|Trigger| Actions{GitHub Actions}
+        Actions -->|Build Multi-Arch| Hub[(Docker Hub)]
     end
 
-    subgraph Edge ["Edge Layer (Raspberry Pi 5 / K3s)"]
-        K3s[K3s Cluster] -->|Pull Image| Hub
-        
-        subgraph Cluster ["Cluster K3s Internal"]
-            Ingress[Traefik Ingress] -->|Route Traffic| Service[K8s Service]
-            Service -->|Load Balance| Pod1[🦈 Agent 1]
-            Service -->|Load Balance| Pod2[🦈 Agent 2]
-        end
+    subgraph Edge_Prod [⚓ Raspberry Pi 5]
+        Hub -->|Pull Image| K3s[Cluster K3s]
+        K3s -->|Deploy| Ingress[Traefik]
+        Ingress -->|Route| Pods(🦈 Architeuthis Agents)
     end
-
-    style Edge fill:#e1f5fe,stroke:#01579b,stroke-width:2px
-    style Pod1 fill:#ffccbc,stroke:#ff5722
-    style Pod2 fill:#ffccbc,stroke:#ff5722
+    
+    %% Liens entre les zones
+    Developer_Zone -.-> Cloud_CI
+    Cloud_CI -.-> Edge_Prod
 ````
 
 ### Tech Stack
