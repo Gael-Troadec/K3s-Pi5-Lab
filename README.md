@@ -40,25 +40,27 @@ I have successfully **COMPLETED Phase II (Orchestration)** and **Phase III (Pers
 
 ```mermaid
 graph LR
-    subgraph Developer_Zone [💻 Dev Environment]
-        User(👱 Gael) -->|Code & Push| GitHub[GitHub Repo]
+    subgraph Developer_Zone ["💻 Dev Environment"]
+        User("👱 Gael") -->|Code & Push| GitHub["GitHub Repo"]
     end
-    subgraph Cloud_CI [☁️ CI / Registry]
-        GitHub -->|Trigger| Actions{GitHub Actions / Buildx}
-        Actions -->|Push Multi-Arch Image| Hub[(Docker Hub)]
+    
+    subgraph Cloud_CI ["☁️ CI / Registry"]
+        GitHub -->|Trigger| Actions{"GitHub Actions / Buildx"}
+        Actions -->|Push Multi-Arch Image| Hub[("Docker Hub")]
     end
-    subgraph Edge_Prod [⚓ Raspberry Pi 5]
-        Hub -->|Pull Image| K3s[Cluster K3s]
+    
+    subgraph Edge_Prod ["⚓ Raspberry Pi 5"]
+        Hub -->|Pull Image| K3s["Cluster K3s"]
         
-        subgraph K3s_Cluster
-            Ingress[Traefik] --> AppSvc[Architeuthis Service]
+        subgraph K3s_Cluster ["K3s Cluster"]
+            Ingress["Traefik"] --> AppSvc["Architeuthis Service"]
             
-            subgraph Pod_Layer
-                Secret[🔐 K8s Secret] -.->|Inject Env Var| AppPod(🦈 Agent Pod)
-                AppPod -->|Auth & Write| RedisPod(💾 Redis Pod)
+            subgraph Pod_Layer ["Pod Layer"]
+                Secret["🔐 K8s Secret"] -.->|Inject Env Var| AppPod("🦈 Agent Pod")
+                AppPod -->|Auth & Write| RedisPod("💾 Redis Pod")
             end
             
-            RedisPod -->|Persist Data| PVC[(🗄️ PVC / Disk)]
+            RedisPod -->|Persist Data| PVC[("🗄️ PVC / Disk")]
         end
     end
     
