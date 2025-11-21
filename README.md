@@ -40,22 +40,22 @@ I have successfully **COMPLETED Phase II (Orchestration)** and **Phase III (Pers
 
 ```mermaid
 graph LR
-    subgraph Developer_Zone ["💻 Dev Environment"]
-        User("👱 Gael") -->|Code & Push| GitHub["GitHub Repo"]
+    subgraph DevEnv ["Dev Environment"]
+        User("👱 Gael") -->|Code & Push| GitHub("GitHub Repo")
     end
     
-    subgraph Cloud_CI ["☁️ CI / Registry"]
+    subgraph CI ["CI / Registry"]
         GitHub -->|Trigger| Actions{"GitHub Actions / Buildx"}
         Actions -->|Push Multi-Arch Image| Hub[("Docker Hub")]
     end
     
-    subgraph Edge_Prod ["⚓ Raspberry Pi 5"]
+    subgraph Edge ["Raspberry Pi 5"]
         Hub -->|Pull Image| K3s["Cluster K3s"]
         
-        subgraph K3s_Cluster ["K3s Cluster"]
-            Ingress["Traefik"] --> AppSvc["Architeuthis Service"]
+        subgraph Cluster ["K3s Cluster"]
+            Ingress("Traefik") --> AppSvc("Architeuthis Service")
             
-            subgraph Pod_Layer ["Pod Layer"]
+            subgraph Pods ["Pod Layer"]
                 Secret["🔐 K8s Secret"] -.->|Inject Env Var| AppPod("🦈 Agent Pod")
                 AppPod -->|Auth & Write| RedisPod("💾 Redis Pod")
             end
@@ -65,8 +65,8 @@ graph LR
     end
     
     %% Liens entre les zones
-    Developer_Zone -.-> Cloud_CI
-    Cloud_CI -.-> Edge_Prod
+    DevEnv -.-> CI
+    CI -.-> Edge
 ```
 
 ### Tech Stack
