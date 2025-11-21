@@ -40,33 +40,33 @@ I have successfully **COMPLETED Phase II (Orchestration)** and **Phase III (Pers
 
 ```mermaid
 graph LR
-    subgraph DevEnv ["Dev Environment"]
-        User("👱 Gael") -->|Code & Push| GitHub("GitHub Repo")
+    subgraph Dev_Env ["Development Environment"]
+        User("Gael") -->|Code & Push| GitHub("GitHub Repo")
     end
     
-    subgraph CI ["CI / Registry"]
-        GitHub -->|Trigger| Actions{"GitHub Actions / Buildx"}
-        Actions -->|Push Multi-Arch Image| Hub[("Docker Hub")]
+    subgraph CI_CD ["CI / Registry"]
+        GitHub -->|Trigger| Actions{"GitHub Actions"}
+        Actions -->|Push Image| Hub[("Docker Hub")]
     end
     
     subgraph Edge ["Raspberry Pi 5"]
-        Hub -->|Pull Image| K3s["Cluster K3s"]
+        Hub -->|Pull Image| K3s["K3s Cluster"]
         
-        subgraph Cluster ["K3s Cluster"]
+        subgraph Cluster ["Internal Architecture"]
             Ingress("Traefik") --> AppSvc("Architeuthis Service")
             
             subgraph Pods ["Pod Layer"]
-                Secret["🔐 K8s Secret"] -.->|Inject Env Var| AppPod("🦈 Agent Pod")
-                AppPod -->|Auth & Write| RedisPod("💾 Redis Pod")
+                Secret["K8s Secret"] -.->|Inject Env Var| AppPod("Agent Pod")
+                AppPod -->|Auth & Write| RedisPod("Redis Pod")
             end
             
-            RedisPod -->|Persist Data| PVC[("🗄️ PVC / Disk")]
+            RedisPod -->|Persist Data| PVC[("PVC / Disk")]
         end
     end
     
-    %% Liens entre les zones
-    DevEnv -.-> CI
-    CI -.-> Edge
+    %% Links
+    Dev_Env -.-> CI_CD
+    CI_CD -.-> Edge
 ```
 
 ### Tech Stack
