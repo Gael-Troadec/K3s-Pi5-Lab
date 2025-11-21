@@ -40,33 +40,26 @@ I have successfully **COMPLETED Phase II (Orchestration)** and **Phase III (Pers
 
 ```mermaid
 graph LR
-    subgraph Dev_Env ["Development Environment"]
-        User("Gael") -->|Code & Push| GitHub("GitHub Repo")
+    subgraph Dev ["Dev Environment"]
+        User(User) -->|Push| Git(GitHub)
     end
     
-    subgraph CI_CD ["CI / Registry"]
-        GitHub -->|Trigger| Actions{"GitHub Actions"}
-        Actions -->|Push Image| Hub[("Docker Hub")]
+    subgraph CI ["CI / Registry"]
+        Git -->|Trigger| Action{Actions}
+        Action -->|Build| Hub[(DockerHub)]
     end
     
-    subgraph Edge ["Raspberry Pi 5"]
-        Hub -->|Pull Image| K3s["K3s Cluster"]
-        
-        subgraph Cluster ["Internal Architecture"]
-            Ingress("Traefik") --> AppSvc("Architeuthis Service")
-            
-            subgraph Pods ["Pod Layer"]
-                Secret["K8s Secret"] -.->|Inject Env Var| AppPod("Agent Pod")
-                AppPod -->|Auth & Write| RedisPod("Redis Pod")
-            end
-            
-            RedisPod -->|Persist Data| PVC[("PVC / Disk")]
-        end
+    subgraph Prod ["Raspberry Pi 5"]
+        Hub -->|Pull| Ingress(Traefik)
+        Ingress --> Svc(Service)
+        Svc --> Pod(Agent Pod)
+        Secret[Secret] -.->|Env Var| Pod
+        Pod -->|Write| Redis(Redis Pod)
+        Redis -->|Save| PVC[(Disk PVC)]
     end
     
-    %% Links
-    Dev_Env -.-> CI_CD
-    CI_CD -.-> Edge
+    Dev -.-> CI
+    CI -.-> Prod
 ```
 
 ### Tech Stack
