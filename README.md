@@ -2,7 +2,7 @@
 
 ![CI Status](https://github.com/Gael-Troadec/K3s-Pi5-Lab/actions/workflows/docker-build.yml/badge.svg)
 ![Platform](https://img.shields.io/badge/platform-linux%2Farm64-orange)
-![Status](https://img.shields.io/badge/status-upskilling-green)
+![Status](https://img.shields.io/badge/status-operational-brightgreen)
 
 ## 📋 About The Project
 
@@ -11,31 +11,32 @@
 As an ex-Military transitioning to DevSecOps, my goal with this project is to build a complete **distributed infrastructure** from scratch. I am moving away from "click-ops" to fully automated, code-driven deployments on constrained hardware (Raspberry Pi 5).
 
 **Core Learnings Achieved:**
-* Complete **CI/CD pipeline** (GitHub Actions -> Docker Hub).
+* Complete **CI/CD pipeline** (Multi-Arch Buildx -> Docker Hub).
 * Orchestration with **Kubernetes (K3s)**.
-* Implementation of **Data Persistence** (Redis).
+* **Stateful Architecture** (Data Persistence with PV/PVC).
+* **SecOps Foundations** (Secrets Management & Env Injection).
 
 ---
 
-## 📍 Current Progress (Day 16)
+## 📍 Current Progress (Day 17)
 
-We have successfully **COMPLETED Phase II (Orchestration & Scaling)** and are starting on Persistence.
+I have successfully **COMPLETED Phase II (Orchestration)** and **Phase III (Persistence)**. The system is now resilient to reboots and secure.
 
 - [x] **Hardware Setup:** Raspberry Pi 5 (8GB) configured with OS Lite.
-- [x] **CI/CD:** Pipeline functional. Commits on `main` trigger a multi-arch build (ARM64/AMD64) via QEMU.
-- [x] **Containerization:** Python agents are containerized and optimized.
-- [x] **K3s Cluster:** Single-node cluster up and running.
-- [x] **Networking:** Service Discovery (NodePort) and Ingress (Traefik) are configured.
-- [x] **Scaling & Resilience:** Deployment configured with replicas, self-healing, and load balancing verified.
-- [x] **State Separation:** Redis is deployed and connected to the application for persistent state management.
-- [ ] **Disk Storage:** Implementation of Persistent Volumes (PVC/PV) for critical data. (Next Focus)
-- [ ] **Security:** Hardening and Policies (Planned).
+- [x] **CI/CD:** Multi-arch build (ARM64/AMD64) via Docker Buildx & QEMU.
+- [x] **Containerization:** Python agents optimized for Edge execution.
+- [x] **K3s Cluster:** Single-node cluster operational.
+- [x] **Networking:** Ingress (Traefik) and Internal DNS Service Discovery.
+- [x] **State Separation:** Redis deployed in Stateful mode.
+- [x] **Disk Storage (PVC):** Persistent Volume Claims implemented. Data survives Pod deletion.
+- [x] **Security:** Secrets management implemented (No plain-text passwords).
+- [ ] **Observability:** Monitoring stack (Prometheus/Grafana). (Next Focus)
 
 ---
 
 ## 🛠️ Technical Architecture
 
-### 📡 Infrastructure Flow (Corrected)
+### 📡 Infrastructure Flow (Updated)
 
 ```mermaid
 graph LR
@@ -44,15 +45,21 @@ graph LR
     end
     subgraph Cloud_CI [☁️ CI / Registry]
         GitHub -->|Trigger| Actions{GitHub Actions / Buildx}
-        Actions -->|Push Image| Hub[(Docker Hub)]
+        Actions -->|Push Multi-Arch Image| Hub[(Docker Hub)]
     end
     subgraph Edge_Prod [⚓ Raspberry Pi 5]
         Hub -->|Pull Image| K3s[Cluster K3s]
-        K3s --> Ingress[Traefik]
-        Ingress --> AppSvc[Architeuthis Service]
-        AppSvc --> Pods(🦈 Architeuthis Agents)
-        Pods --> RedisSvc[Redis Service]
-        RedisSvc --> RedisDB[(💾 Redis DB)]
+        
+        subgraph K3s_Cluster
+            Ingress[Traefik] --> AppSvc[Architeuthis Service]
+            
+            subgraph Pod_Layer
+                Secret[🔐 K8s Secret] -.->|Inject Env Var| AppPod(🦈 Agent Pod)
+                AppPod -->|Auth & Write| RedisPod(💾 Redis Pod)
+            end
+            
+            RedisPod -->|Persist Data| PVC[(🗄️ PVC / Disk)]
+        end
     end
     
     %% Liens entre les zones
@@ -62,10 +69,11 @@ graph LR
 
 ### Tech Stack
 * **Language:** Python (Flask)
-* **Container:** Docker
+* **Container:** Docker (Multi-Arch)
 * **Orchestration:** K3s (Lightweight Kubernetes)
+* **Storage:** Local-Path Provisioner (PV/PVC)
+* **Security:** Kubernetes Secrets (Base64)
 * **Ingress:** Traefik
-* **Tools:** VS Code, Git, K9s
 
 ---
 
@@ -74,7 +82,7 @@ graph LR
 If you want to replicate this setup on a Raspberry Pi, follow these steps:
 
 ### 1. Install K3s
-First, install the lightweight Kubernetes engine on the Pi (with user permissions enabled):
+First, install the lightweight Kubernetes engine on the Pi:
 
 ```bash
 curl -sfL [https://get.k3s.io](https://get.k3s.io) | INSTALL_K3S_EXEC="--write-kubeconfig-mode 644" sh -
@@ -82,19 +90,20 @@ curl -sfL [https://get.k3s.io](https://get.k3s.io) | INSTALL_K3S_EXEC="--write-k
 
 ### 2. Deploy the Fleet
 
-Clone the repository and apply the Kubernetes manifests:
+Clone the repository and apply the Kubernetes manifests.
+*Note: This will deploy the Storage Claims, Secrets, Database, and Application.*
 
 ```bash
 git clone [https://github.com/Gael-Troadec/K3s-Pi5-Lab.git](https://github.com/Gael-Troadec/K3s-Pi5-Lab.git)
 cd K3s-Pi5-Lab
+
+# Apply all manifests (Order matters, but K8s handles convergence)
 kubectl apply -f manifests/
 ```
 
 ### 3. Access the Dashboard
 
-Since this is a local lab without a real domain name, you need to map the local domain.
-
-Add this line to your local `/etc/hosts` (Linux/Mac) or `C:\Windows\System32\drivers\etc\hosts` (Windows):
+Map the local domain in your `/etc/hosts` (Linux/Mac) or `C:\Windows\System32\drivers\etc\hosts` (Windows):
 
 ```text
 192.168.1.XXX   architeuthis.local
@@ -102,7 +111,7 @@ Add this line to your local `/etc/hosts` (Linux/Mac) or `C:\Windows\System32\dri
 
 *(Replace `192.168.1.XXX` with your Raspberry Pi IP address)*
 
-Then open your browser and navigate to: **http://architeuthis.local**
+Then navigate to: **http://architeuthis.local**
 
 ---
 
@@ -111,10 +120,10 @@ Then open your browser and navigate to: **http://architeuthis.local**
 | Phase | Focus | Status |
 | :--- | :--- | :--- |
 | **I. Foundations** | Linux, Docker, CI/CD | ✅ Done |
-| **II. Orchestration** | K3s, Ingress, GitOps | 🔄 In Progress |
-| **III. Persistence** | Storage, Database, State | ⏳ Planned |
-| **IV. Mutation** | Rewrite in Golang | ⏳ Planned |
-| **V. Security** | CKS Prep, Hardening | ⏳ Planned |
+| **II. Orchestration** | K3s, Ingress, GitOps | ✅ Done |
+| **III. Persistence** | Storage, Database, State | ✅ Done |
+| **IV. Security** | Secrets, Hardening | 🔄 Started |
+| **V. Mutation** | Rewrite in Golang | ⏳ Planned |
 
 ---
 
