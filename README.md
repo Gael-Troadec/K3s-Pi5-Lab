@@ -1,8 +1,9 @@
 # 🐙 Project Architeuthis: Autonomous Edge Fleet Lab
 
-![CI Status](https://github.com/Gael-Troadec/K3s-Pi5-Lab/actions/workflows/docker-build.yml/badge.svg)
-![Platform](https://img.shields.io/badge/platform-linux%2Farm64-orange)
-![Status](https://img.shields.io/badge/status-operational-brightgreen)
+[![CI Status](https://github.com/Gael-Troadec/K3s-Pi5-Lab/actions/workflows/docker-build.yml/badge.svg)](https://github.com/Gael-Troadec/K3s-Pi5-Lab/actions/workflows/docker-build.yml/badge.svg)
+[![Platform](https://img.shields.io/badge/platform-linux%2Farm64-orange)](https://img.shields.io/badge/platform-linux%2Farm64-orange)
+[![Status](https://img.shields.io/badge/status-operational-brightgreen)](https://img.shields.io/badge/status-operational-brightgreen)
+[![Observability](https://img.shields.io/badge/monitoring-prometheus%20%7C%20grafana%20%7C%20loki-blue)](https://img.shields.io/badge/monitoring-prometheus%20%7C%20grafana%20%7C%20loki-blue)
 
 ## 📋 About The Project
 
@@ -14,23 +15,21 @@ As an ex-Military transitioning to DevSecOps, my goal with this project is to bu
 * Complete **CI/CD pipeline** (Multi-Arch Buildx -> Docker Hub).
 * Orchestration with **Kubernetes (K3s)**.
 * **Stateful Architecture** (Data Persistence with PV/PVC).
-* **SecOps Foundations** (Secrets Management & Env Injection).
+* **Observability Stack** (Metrics & Logs Visualization).
 
 ---
 
-## 📍 Current Progress (Day 17)
+## 📍 Current Progress (Day 19)
 
-I have successfully **COMPLETED Phase II (Orchestration)** and **Phase III (Persistence)**. The system is now resilient to reboots and secure.
+I have successfully **COMPLETED Phase IV (Observability)**. The system is now fully monitored.
 
-- [x] **Hardware Setup:** Raspberry Pi 5 (8GB) configured with OS Lite.
-- [x] **CI/CD:** Multi-arch build (ARM64/AMD64) via Docker Buildx & QEMU.
-- [x] **Containerization:** Python agents optimized for Edge execution.
-- [x] **K3s Cluster:** Single-node cluster operational.
-- [x] **Networking:** Ingress (Traefik) and Internal DNS Service Discovery.
-- [x] **State Separation:** Redis deployed in Stateful mode.
-- [x] **Disk Storage (PVC):** Persistent Volume Claims implemented. Data survives Pod deletion.
-- [x] **Security:** Secrets management implemented (No plain-text passwords).
-- [ ] **Observability:** Monitoring stack (Prometheus/Grafana). (Next Focus)
+* ✅ **Hardware Setup:** Raspberry Pi 5 (8GB) configured with OS Lite.
+* ✅ **Architecture:** Cross-compiled for ARM64 (using Docker Buildx) to support Edge Hardware.
+* ✅ **Orchestration:** K3s Single-node cluster operational.
+* ✅ **Persistence:** Redis Data survives Pod deletion (PVC/PV).
+* ✅ **Security:** Secrets management implemented (No plain-text passwords).
+* ✅ **Monitoring:** Prometheus (Metrics) & Grafana (Dashboards) installed.
+* ✅ **Logging:** Loki & Promtail installed for centralized logging.
 
 ---
 
@@ -42,32 +41,36 @@ I have successfully **COMPLETED Phase II (Orchestration)** and **Phase III (Pers
 graph LR
     subgraph Dev ["Dev Environment"]
         User(User) -->|Push| Git(GitHub)
+        User -->|Buildx| Hub[(DockerHub)]
     end
     
-    subgraph CI ["CI / Registry"]
-        Git -->|Trigger| Action{Actions}
-        Action -->|Build| Hub[(DockerHub)]
-    end
-    
-    subgraph Prod ["Raspberry Pi 5"]
+    subgraph Prod ["Raspberry Pi 5 (Edge)"]
         Hub -->|Pull| Ingress(Traefik)
         Ingress --> Svc(Service)
         Svc --> Pod(Agent Pod)
-        Secret[Secret] -.->|Env Var| Pod
-        Pod -->|Write| Redis(Redis Pod)
-        Redis -->|Save| PVC[(Disk PVC)]
+        
+        subgraph Data ["Persistence"]
+            Pod -->|Write| Redis(Redis Pod)
+            Redis -->|Save| PVC[(Disk PVC)]
+        end
+
+        subgraph Obs ["Observability"]
+            Prom(Prometheus) -.->|Scrape| Pod
+            Promtail(Promtail) -.->|Tail Logs| Pod
+            Promtail --> Loki(Loki)
+            Grafana(Grafana) -->|Query| Prom
+            Grafana -->|Query| Loki
+        end
     end
     
-    Dev -.-> CI
-    CI -.-> Prod
+    Dev -.-> Prod
 ```
 
 ### Tech Stack
 * **Language:** Python (Flask)
-* **Container:** Docker (Multi-Arch)
+* **Container:** Docker (Multi-Arch AMD64/ARM64)
 * **Orchestration:** K3s (Lightweight Kubernetes)
-* **Storage:** Local-Path Provisioner (PV/PVC)
-* **Security:** Kubernetes Secrets (Base64)
+* **Observability:** Prometheus, Grafana, Loki, Promtail
 * **Ingress:** Traefik
 
 ---
@@ -78,13 +81,11 @@ If you want to replicate this setup on a Raspberry Pi, follow these steps:
 
 ### 1. Install K3s
 First, install the lightweight Kubernetes engine on the Pi:
-
 ```bash
 curl -sfL [https://get.k3s.io](https://get.k3s.io) | INSTALL_K3S_EXEC="--write-kubeconfig-mode 644" sh -
 ```
 
 ### 2. Deploy the Fleet
-
 Clone the repository and apply the Kubernetes manifests.
 *Note: This will deploy the Storage Claims, Secrets, Database, and Application.*
 
@@ -92,33 +93,37 @@ Clone the repository and apply the Kubernetes manifests.
 git clone [https://github.com/Gael-Troadec/K3s-Pi5-Lab.git](https://github.com/Gael-Troadec/K3s-Pi5-Lab.git)
 cd K3s-Pi5-Lab
 
-# Apply all manifests (Order matters, but K8s handles convergence)
+# Apply all manifests
 kubectl apply -f manifests/
 ```
 
 ### 3. Access the Dashboard
-
-Map the local domain in your `/etc/hosts` (Linux/Mac) or `C:\Windows\System32\drivers\etc\hosts` (Windows):
-
+Map the local domain in your `/etc/hosts`:
 ```text
 192.168.1.XXX   architeuthis.local
 ```
 
-*(Replace `192.168.1.XXX` with your Raspberry Pi IP address)*
-
 Then navigate to: **http://architeuthis.local**
+
+### 4. Access Monitoring (Grafana)
+Use port-forwarding to access the dashboard:
+```bash
+kubectl port-forward -n monitoring svc/prometheus-grafana 3000:80
+```
+Then visit: **http://localhost:3000** (User: `admin`)
 
 ---
 
 ## 🗺️ Roadmap
 
 | Phase | Focus | Status |
-| :--- | :--- | :--- |
+|---|---|---|
 | **I. Foundations** | Linux, Docker, CI/CD | ✅ Done |
 | **II. Orchestration** | K3s, Ingress, GitOps | ✅ Done |
 | **III. Persistence** | Storage, Database, State | ✅ Done |
-| **IV. Security** | Secrets, Hardening | 🔄 Started |
-| **V. Mutation** | Rewrite in Golang | ⏳ Planned |
+| **IV. Observability**| Prometheus, Grafana, Loki | ✅ Done |
+| **V. Automation** | GitHub Actions Cross-Compile | 🚧 Next Step |
+| **VI. Edge AI** | Golang Agents & Tinygrad | ⏳ Planned |
 
 ---
 
