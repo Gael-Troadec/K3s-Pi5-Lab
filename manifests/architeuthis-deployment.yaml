@@ -16,5 +16,13 @@ spec:
     spec:
       containers:
       - name: architeuthis-container
-        image: eylir/architeuthis:latest
+        image: eylir/python-app:v2
         imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-password-secret
+              key: redis-password

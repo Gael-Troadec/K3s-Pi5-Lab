@@ -2,10 +2,13 @@ from flask import Flask
 import platform
 import socket
 import redis
+import os
 
 app = Flask(__name__)
 
-db = redis.Redis(host='redis-service', port=6379, decode_responses=True)
+redis_password = os.getenv('REDIS_PASSWORD')
+
+db = redis.Redis(host='redis-service', port=6379, password=redis_password, decode_responses=True)
 
 @app.route('/')
 def hello():
@@ -14,9 +17,10 @@ def hello():
         redis_status = "CONNECTED"
     except redis.ConnectionError:
         count = "ERROR"
-        redis_status = "DISCONNECTED"
+        redis_status = "DISCONNECTED (Auth Failed?)"
 
     return (f"SYSTEM ARCHITEUTHIS ONLINE\n"
+            f"Version: v2.0 (CI/CD Automated)\n"
             f"Pod ID: {socket.gethostname()}\n"
             f"Architecture: {platform.machine()}\n"
             f"Memory State (Redis): {redis_status}\n"
