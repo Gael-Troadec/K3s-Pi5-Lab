@@ -89,6 +89,8 @@ python proto-fourier/generator.py
 # 2. Run the Sonar
 python proto-fourier/sonar.py
 
+```
+
 ### Tech Stack
 * **Language:** Python (Flask) -> *Moving to Golang (Phase VI)*
 * **CI/CD:** GitHub Actions + Docker Buildx + QEMU
